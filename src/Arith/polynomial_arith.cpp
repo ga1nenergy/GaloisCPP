@@ -17,7 +17,7 @@ using namespace std;
 
 #include "polynomial_arith.h"
 
-namespace shk_galoiscpp
+namespace galoiscpp
 {
 
 

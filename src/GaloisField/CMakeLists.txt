@@ -1,0 +1,1 @@
+add_library(GaloisField galoisfield.cpp irreducible_poly.hpp)

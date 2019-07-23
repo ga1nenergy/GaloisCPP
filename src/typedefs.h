@@ -23,7 +23,7 @@
    To avoid future naming conflicts, this entire library has been placed in
    the namespace 'shk_galoiscpp;.
 */
-namespace shk_galoiscpp
+namespace galoiscpp
 {
 
 /**

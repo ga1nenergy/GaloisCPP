@@ -15,7 +15,7 @@
 #include <cassert>
 #include "modular_arith.h"
 
-namespace shk_galoiscpp
+namespace galoiscpp
 {
 
 // Computes greatest common divisor of two positive integers

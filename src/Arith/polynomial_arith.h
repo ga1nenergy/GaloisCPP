@@ -22,7 +22,7 @@
 #ifndef POLYNOMIAL_ARITH_H
 #define POLYNOMIAL_ARITH_H
 
-namespace shk_galoiscpp
+namespace galoiscpp
 {
 
 

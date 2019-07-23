@@ -24,7 +24,7 @@ using namespace std;
 #ifndef MODULAR_ARITH_H
 #define MODULAR_ARITH_H
 
-namespace shk_galoiscpp
+namespace galoiscpp
 {
 
 /**

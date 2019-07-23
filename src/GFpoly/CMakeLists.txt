@@ -1,0 +1,1 @@
+add_library(GFpoly gfpoly.cpp representations.cpp)

@@ -17,9 +17,11 @@
 
 #include "typedefs.h"
 #include <cassert>
+#include <vector>
 
 
-namespace shk_galoiscpp
+
+namespace galoiscpp
 {
 
 /**
@@ -49,6 +51,8 @@ class GaloisField
          (must be an irreducible polynomial over the prime field of GF)
       */
       GaloisField(Fint mod, Int dim, Fint poly[]);
+
+      GaloisField(Fint mod, Int dim);
 
       /**
          Destructs GaloisField, freeing allocated space for reduction polynomial in it.
@@ -80,14 +84,34 @@ class GaloisField
          @param output an output stream on the left of << sign
          @returns output stream
       */
-      friend ostream& operator<<(ostream& output, const GaloisField& gf);
+      friend std::ostream& operator<<(std::ostream& output, const GaloisField& gf);
 
+      // Getters
+      std::vector<std::vector<Fint>> elems();
+      Fint add(Fint lhs, Fint rhs);
+      Fint subtract(Fint lhs, Fint rhs);
+      Fint multiply(Fint lhs, Fint rhs);
+      Fint inverse(Fint op);
+
+      Fint get_size();
+
+      /* TODO
+       * 1) get rid of all C-like stuff
+       */
    private:
       Fint modulus;      // prime modulus (characteristic) of Galois Field
       Int dimension;     // dimension of Galois Field
       Fint* reductpoly;  // reduction polynomial of Galois Field
-};
+      Fint size;
 
+      std::vector<std::vector<Fint>> field_table;    // correspondence between a power of a primitive elem and a poly
+      std::vector<std::vector<Fint>> add_table;             // a table for addition
+      std::vector<std::vector<Fint>> sub_table;             // a table for subtraction
+      std::vector<std::vector<Fint>> mult_table;            // a table for multiplication
+      std::vector<Fint> inv_table;             // table inverse elems
+
+      void create_tables();
+};
 
 
 
@@ -111,7 +135,6 @@ inline Fint GaloisField::reductionPolynomial(Int i) const
 {
    return reductpoly[i];
 }
-
 
 
 } // namespace shk_galoiscpp
