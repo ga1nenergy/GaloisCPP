@@ -17,9 +17,9 @@
 */
 
 #include <iostream>
-using namespace std;
-
 #include "typedefs.h"
+
+using namespace std;
 
 #ifndef MODULAR_ARITH_H
 #define MODULAR_ARITH_H

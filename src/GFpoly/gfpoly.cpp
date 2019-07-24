@@ -46,18 +46,18 @@ namespace galoiscpp {
     }
 
 
-    GFpoly& GFpoly::operator=(const GFpoly &lhs) {
-        field = lhs.field;
-        coefs = lhs.coefs;
-        degree = lhs.degree;
+    GFpoly& GFpoly::operator=(const GFpoly &rhs) {
+        field = rhs.field;
+        coefs = rhs.coefs;
+        degree = rhs.degree;
 
         return *this;
     }
 
 
-    GFpoly GFpoly::operator+(const GFpoly &lhs) const {
+    GFpoly GFpoly::operator+(const GFpoly &rhs) const {
         GFpoly res, op;
-        (this->degree > lhs.degree) ? ({res = *this; op = lhs;}) : ({res = lhs; op = *this;});
+        (this->degree > rhs.degree) ? ({res = *this; op = rhs;}) : ({res = rhs; op = *this;});
 
         for (int i = 0; i <= op.degree; i++) {
             res[i] = res[i] + op[i];
@@ -71,12 +71,21 @@ namespace galoiscpp {
         return res;
     }
 
-    GFpoly GFpoly::operator-(const GFpoly &lhs) const {
-        GFpoly res, op;
-        (this->degree > lhs.degree) ? ({res = *this; op = lhs;}) : ({res = lhs; op = *this;});
+    GFpoly GFpoly::operator-(const GFpoly &rhs) const {
+        GFpoly res;
 
-        for (int i = 0; i <= op.degree; i++) {
-            res[i] = res[i] - op[i];
+        if (this->degree > rhs.degree) {
+            res = *this;
+            for (int i = 0; i <= rhs.degree; i++) {
+                res[i] = res[i] - rhs[i];
+            }
+        } else {
+            res = rhs;
+            for (int i = 0; i <= this->degree; i++) {
+                res[i] = this->coefs[i] - res[i];
+            }
+            for (int i = this->degree + 1; i <= res.degree; i++)
+                res[i] = -res[i];
         }
 
         while (res.coefs[res.degree] == 0 && res.degree != 0) {
@@ -101,6 +110,9 @@ namespace galoiscpp {
         GFpoly res(rhs.getField(), rhs.degree + lhs.degree);
 
         GFpoly op1 = rhs, op2 = lhs;
+
+//        cout << "op1: " << op1 << endl;
+//        cout << "op2: " << op2 << endl;
 
         for (size_t i = 0; i < op1.coefs.size(); i++) {
             for (size_t j = 0; j < op2.coefs.size(); j++) {
@@ -142,13 +154,24 @@ namespace galoiscpp {
 
         while (r.degree >= denom.degree) {
             GFelement coef = r[r.degree] * denom[denom.degree].inverse();
+//            std::cout << "coef: " << coef << std::endl;
             GFpoly op = coef * denom;
+//            std::cout << "op: " << op << std::endl;
+//            std::cout << "r before: " << r << std::endl;
 
-            for (int i = 0; i < op.degree + 1; i++) {
+//            GFelement op1(field, 0);
+//            GFelement op2(field, 6);
+//
+//            op1 - op2;
+
+            for (int i = op.degree; i >= 0; i--) {
+//                cout << r[i + r.degree - op.degree] << " " << op[i] << endl;
                 r[i + r.degree - op.degree] = r[i + r.degree - op.degree] - op[i];
+//                cout << r[i + r.degree - op.degree] << endl;
             }
             r.coefs.pop_back();
             r.degree--;
+//            std::cout << "r after: " << r << std::endl;
 
             q.insert(q.begin(), coef);
         }
@@ -164,11 +187,11 @@ namespace galoiscpp {
         return qr;
     }
 
-    GFpoly GFpoly::operator/(const GFelement &lhs) const {
+    GFpoly GFpoly::operator/(const GFelement &rhs) const {
         GFpoly res = *this;
 
         for (auto & elem : res.coefs)
-            elem = elem / lhs;
+            elem = elem / rhs;
         return res;
     }
 
@@ -178,15 +201,6 @@ namespace galoiscpp {
 
     GFelement GFpoly::operator[](int idx) const {
         return coefs[idx];
-    }
-
-    // Getters
-    GaloisField* GFpoly::getField() const {
-        if (!coefs.empty()) {
-            return coefs[0].getField();
-        } else {
-            throw std::logic_error("Poly is empty");
-        }
     }
 
     bool operator==(const GFpoly &lhs, const GFpoly &rhs) {
@@ -247,20 +261,22 @@ namespace galoiscpp {
             if (this->polyval(i) == 0) {
                 GFelement rt = GFelement(field, i);
 
+                GFpoly root_poly(field, 1);
+                if (i == 0) {
+                    root_poly[0] = GFelement(field, 0);
+                    root_poly[1] = GFelement(field, 1);
+                } else {
+                    root_poly[0] = GFelement(field, 1);
+                    root_poly[1] = -rt.inverse();
+                }
+
+//                std::cout << "roots poly: " << root_poly << std::endl;
+
                 GFpoly q = *this, r;
                 while (true) {
-                    GFpoly root_poly(field, 1);
-                    if (i == 0) {
-                        root_poly[0] = GFelement(field, 0);
-                        root_poly[1] = GFelement(field, 1);
-                    } else {
-                        root_poly[0] = GFelement(field, 1);
-                        root_poly[1] = -rt.inverse();
-                    }
-
                     auto qr = q / root_poly;
-                    q = qr[0]; cout << "q: " << q << endl;
-                    r = qr[1]; cout << "r: " << r << endl;
+                    q = qr[0]; //cout << "q: " << q << endl;
+                    r = qr[1]; //cout << "r: " << r << endl;
 
                     if (r[0] != 0 || r.degree != 0)
                         break;
@@ -306,7 +322,7 @@ namespace galoiscpp {
         GFpoly num, denom;
         (op1.degree > op2.degree) ? ({num = op1; denom = op2;}) : ({num = op2; denom = op1;});
 
-        while (denom.degree >= degree) {
+        while (denom.degree > degree) {
             auto qr = num / denom;
             num = denom;
             denom = qr[1];
@@ -325,13 +341,13 @@ namespace galoiscpp {
         GFpoly y2(field, 0); y2[0] = GFelement(field, 0);
         GFpoly y1(field, 0); y1[0] = GFelement(field, 1);
 
-        int i = 1;
-        cout << "Step " << i << endl;
-        cout << "r2: " << r2 << endl;
-        cout << "r1: " << r1 << endl;
-        cout << "y2: " << y2 << endl;
-        cout << "y1: " << y1 << endl;
-        cout << endl;
+//        int i = 1;
+//        cout << "Step " << i << endl;
+//        cout << "r2: " << r2 << endl;
+//        cout << "r1: " << r1 << endl;
+//        cout << "y2: " << y2 << endl;
+//        cout << "y1: " << y1 << endl;
+
 
         while (r1.degree != 0) {
             std::vector<GFpoly> qr = r2 / r1;
@@ -342,12 +358,13 @@ namespace galoiscpp {
             r2 = r1;
             r1 = qr[1];
 
-            i++;
-            cout << "Step " << i << endl;
-            cout << "r2: " << r2 << endl;
-            cout << "r1: " << r1 << endl;
-            cout << "y2: " << y2 << endl;
-            cout << "y1: " << y1 << endl;
+//            i++;
+
+//            cout << "Step " << i << endl;
+//            cout << "r2: " << r2 << endl;
+//            cout << "r1: " << r1 << endl;
+//            cout << "y2: " << y2 << endl;
+//            cout << "y1: " << y1 << endl;
         }
 
         std::pair<GFelement, GFpoly> res = {r1[0], y1};
@@ -365,5 +382,37 @@ namespace galoiscpp {
         GFpoly res = poly.inverse(mod);
         return res;
     }
+
+    GFpoly GFpoly::conv(const GFpoly &op1, const GFpoly &op2) {
+        return op1 * op2;
+    }
+
+    GFpoly GFpoly::convmod(const GFpoly &op1, const GFpoly &op2, const GFpoly &mod) {
+        auto qr = (op1 * op2) / mod;
+        return qr[1];
+    }
+
+    std::vector<GFpoly> GFpoly::deconv(const GFpoly &op1, const GFpoly &op2) {
+        return op1 / op2;
+    }
+
+    GFpoly GFpoly::deconvmod(const GFpoly &op1, const GFpoly &op2, const GFpoly &mod) {
+        auto qr = (op1 * op2.inverse(mod)) / mod;
+        return qr[1];
+    }
+
+    // Getters
+    GaloisField* GFpoly::getField() const {
+        if (!coefs.empty()) {
+            return coefs[0].getField();
+        } else {
+            throw std::logic_error("Poly is empty");
+        }
+    }
+
+    Fint GFpoly::getDegree() const {
+        return degree;
+    }
+
 
 }

@@ -245,4 +245,30 @@ Fint GaloisField::get_size() {
     return size;
 }
 
+/* TODO
+ * 1) think how to combine instances of a field and its subfield
+ * 2) improve "while-loop" logic
+ */
+std::vector<Fint> GaloisField::find_subfield(int sub_m) {
+    if (sub_m < 1) {
+        throw std::logic_error("Field extension must be a natural number");
+    }
+
+    Fint subfield_size = pow(modulus, sub_m) - 1;
+    std::vector<Fint> set;
+    for (Fint i = 2; i < size; i++) {
+        set.clear();
+        Fint elem = 1;
+
+        do {
+            elem = multiply(elem, i);
+            set.push_back(elem);
+        } while (set.size() != subfield_size); //!
+        if (set[set.size() - 1] == 1)
+            break;
+    }
+
+    return set;
+}
+
 } // namespace shk_galoiscpp

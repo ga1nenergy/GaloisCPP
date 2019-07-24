@@ -135,50 +135,50 @@ bool operator>=(const GFelement& lhs, const GFelement& rhs)
 
 
 //------------------------------------------------------
-GFelement GFelement::operator+(const GFelement& lhs) const
+GFelement GFelement::operator+(const GFelement& rhs) const
 {
-    if (lhs.field != field) throw ErrorIncompatibleFields;
+    if (rhs.field != field) throw ErrorIncompatibleFields;
 
-    GFelement result(lhs.field, lhs.field->add(lhs.degree, degree));
+    GFelement result(rhs.field, rhs.field->add(degree, rhs.degree));
     return result;
 }
 
 
 
 //------------------------------------------------------
-GFelement GFelement::operator-(const GFelement& lhs) const
+GFelement GFelement::operator-(const GFelement& rhs) const
 {
-    if (lhs.field != field) throw ErrorIncompatibleFields;
+    if (rhs.field != field) throw ErrorIncompatibleFields;
 
-    GFelement result(lhs.field, lhs.field->subtract(lhs.degree, degree));
+    GFelement result(rhs.field, rhs.field->subtract(degree, rhs.degree));
     return result;
 }
 
 
 
 //------------------------------------------------------
-GFelement GFelement::operator*(const GFelement& lhs) const
+GFelement GFelement::operator*(const GFelement& rhs) const
 {
-    if (lhs.field != field) throw ErrorIncompatibleFields;
+    if (rhs.field != field) throw ErrorIncompatibleFields;
 
-    GFelement result(lhs.field, lhs.field->multiply(lhs.degree, degree));
+    GFelement result(rhs.field, rhs.field->multiply(degree, rhs.degree));
     return result;
 }
 
 
 
 //------------------------------------------------------
-GFelement GFelement::operator/(const GFelement& lhs) const
+GFelement GFelement::operator/(const GFelement& rhs) const
 {
-    return  lhs * this->inverse();
+    return  *this * rhs.inverse();
 }
 
 
 
 //------------------------------------------------------
-GFelement GFelement::operator*(Fint lhs) const
+GFelement GFelement::operator*(Fint rhs) const
 {
-    GFelement result(field, field->multiply(lhs, degree));
+    GFelement result(field, field->multiply(degree, rhs));
     return result;
 }
 
@@ -225,11 +225,11 @@ GFelement GFelement::inverse() const
 GFelement GFelement::power(Fint p) const
 {
     if (p < 0) throw std::logic_error("Power degree must be >= 0.");
-    if (degree == 0)
+    if (degree == 0 || degree == 1)
         return *this;
 
     Fint result_degree = 1;
-    for (int i = 1; i < p; i++)
+    for (int i = 0; i < p; i++)
         result_degree = field->multiply(result_degree, degree);
 
     GFelement result(field, result_degree);
@@ -247,6 +247,49 @@ GFelement GFelement::sum_times(Fint times) const
 
     GFelement result(field, result_degree);
     return result;
+}
+
+/* TODO
+ * 1) add fields compatibility check
+ */
+    GFelement GFelement::dot(const std::vector<GFelement> &op1, const std::vector<GFelement> &op2) {
+    if (op1.size() != op2.size())
+        throw std::logic_error("Operands length must match");
+
+    GaloisField *field = op1[0].getField();
+
+    GFelement s(field, 0);
+    for (size_t i = 0; i < op1.size(); i++) {
+        s = s + op1[i] * op2[i];
+    }
+
+    return s;
+}
+
+GFelement GFelement::dotint(const std::vector<int> &op1, const std::vector<GFelement> &op2) {
+    if (op1.size() != op2.size())
+        throw std::logic_error("Operands length must match");
+
+    GaloisField *field = op2[0].getField();
+
+    GFelement s(field, 0);
+    for (size_t i = 0; i < op1.size(); i++) {
+        s = s + op2[i].sum_times(op1[i]);
+    }
+
+    return s;
+}
+
+GFelement GFelement::dotint(const std::vector<GFelement> &op1, const std::vector<int> &op2) {
+    return dotint(op2, op1);
+}
+
+std::vector<GFelement> GFelement::to_gf(GaloisField *field, const vector<Fint> &vector) {
+    std::vector<GFelement> res(vector.size());
+    for (size_t i = 0; i < res.size(); i++) {
+        res[i] = GFelement(field, vector[i]);
+    }
+    return res;
 }
 
 

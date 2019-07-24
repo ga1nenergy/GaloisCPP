@@ -2,10 +2,10 @@
 // Created by ga1nenergy on 22.07.2019.
 //
 
+#include "gfpoly.h"
+
 #ifndef GALOISCPP_REPRESENTATIONS_H
 #define GALOISCPP_REPRESENTATIONS_H
-
-#include "gfpoly.h"
 
 namespace galoiscpp {
     GFpoly roots_to_poly(const std::vector<GFelement> &rts);

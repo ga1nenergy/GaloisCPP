@@ -12,13 +12,14 @@
 
 **********************************************************************/
 
-#ifndef GALOISFIELD_H
-#define GALOISFIELD_H
-
 #include "typedefs.h"
+
+#include <ostream>
 #include <cassert>
 #include <vector>
 
+#ifndef GALOISFIELD_H
+#define GALOISFIELD_H
 
 
 namespace galoiscpp
@@ -94,6 +95,8 @@ class GaloisField
       Fint inverse(Fint op);
 
       Fint get_size();
+
+      std::vector<Fint> find_subfield(int sub_m);
 
       /* TODO
        * 1) get rid of all C-like stuff

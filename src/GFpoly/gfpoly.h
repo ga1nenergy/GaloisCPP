@@ -2,11 +2,11 @@
 // Created by ga1nenergy on 19.07.2019.
 //
 
-#ifndef GALOISCPP_GFPOLY_H
-#define GALOISCPP_GFPOLY_H
-
 #include <vector>
 #include "gfelement.h"
+
+#ifndef GALOISCPP_GFPOLY_H
+#define GALOISCPP_GFPOLY_H
 
 // LSB goes first!
 
@@ -58,6 +58,13 @@ public:
     GFelement& operator[](int idx);
     GFelement operator[](int idx) const;
 
+    // TODO
+    static GFpoly conv(const GFpoly &op1, const GFpoly &op2);
+    static GFpoly convmod(const GFpoly &op1, const GFpoly &op2, const GFpoly &mod);
+    static std::vector<GFpoly> deconv(const GFpoly &op1, const GFpoly &op2);
+    static GFpoly deconvmod(const GFpoly &op1, const GFpoly &op2, const GFpoly &mod);
+
+
     std::vector<GFelement> roots() const;
     static std::vector<GFelement> roots(const GFpoly& poly);
 
@@ -88,6 +95,7 @@ public:
 
     // Getters
     GaloisField* getField() const;
+    Fint getDegree() const;
 };
 }
 

@@ -12,15 +12,13 @@
 
 *******************************************************************************/
 
-#ifndef GFELEMENT_H
-#define GFELEMENT_H
-
-#include <iostream>
-using namespace std;
-
 #include "galoisfield.h"
 #include "polynomial_arith.h"
 
+#include <iostream>
+
+#ifndef GFELEMENT_H
+#define GFELEMENT_H
 
 namespace galoiscpp
 {
@@ -271,8 +269,13 @@ class GFelement
 
         GFelement sum_times(Fint times) const;
 
+        static GFelement dot(const std::vector<GFelement> &op1, const std::vector<GFelement> &op2);
+        static GFelement dotint(const std::vector<int> &op1, const std::vector<GFelement> &op2);
+        static GFelement dotint(const std::vector<GFelement> &op2, const std::vector<int> &op1);
 
-    private:
+        static std::vector<GFelement> to_gf(GaloisField *field, const std::vector<Fint> &vector);
+
+private:
         GaloisField* field;  // Galois Field associated with this polynomial
         Fint degree;
 };
