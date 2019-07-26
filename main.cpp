@@ -1,8 +1,11 @@
-#include <GFpoly/representations.h>
-#include "gfelement.h"
-#include "galoisfield.h"
-#include "gfpoly.h"
-#include "remainder_code.h"
+//#include <Codec/representations.h>
+//#include "gfelement.h"
+//#include "galoisfield.h"
+//#include "gfpoly.h"
+//#include "remainder_code.h"
+//#include <Algorithms/gfalgorithms.h>
+
+#include "api/galoiscpp.h"
 
 #include <iostream>
 #include <vector>
@@ -11,64 +14,63 @@
 using namespace galoiscpp;
 
 int main() {
-    int n = 12, n_sub = 6;
+    int n = 12, n_strong = 6;
     int p = 7, m = 2;
     int t_strong = 4, t_weak = 2;
 
-    remainder_code::scenario_t sc = {n, n_sub, t_weak, t_strong};
-
-    GaloisField field(p, m);
+    GaloisField field(p, m); std::cout << field << std::endl;
 
     std::vector<Fint> subfield = field.find_subfield(1);
 
     std::vector<GFelement> subfield_locators = GFelement::to_gf(&field, subfield);
-    subfield_locators.resize(n_sub);
+    subfield_locators.resize(n_strong);
 
     std::vector<GFelement> locators = subfield_locators;
+    std::vector<GFelement> field_locators;
     for (int i = 1; i < field.get_size() && locators.size() < n; i++) {
-        if (std::find(subfield.begin(), subfield.end(), i) == subfield.end())
+        if (std::find(subfield.begin(), subfield.end(), i) == subfield.end()) {
             locators.emplace_back(&field, i);
-    }
-
-    std::vector<int> msg = {1, 2, 2, 1, 2, 1, 0, 0, 0, 0, 0, 0};
-//    msg.resize(sc.n_strong); //!!!
-//    std::vector<std::vector<GFelement>> H = remainder_code::parity_check_matrix(locators, t);
-    std::vector<std::vector<GFelement>> H = remainder_code::parity_check_matrix_punct(locators, sc);
-
-    std::vector<GFelement> syndrome(H.size());
-    for (size_t i = 0; i < syndrome.size(); i++) {
-        syndrome[i] = GFelement::dotint(H[i], msg);
-    }
-
-//    for (auto & row : H) {
-//        row.resize(sc.n_strong);
-//    }
-
-    for (auto & row : H) {
-        for (auto & e : row) {
-            std::cout << e << " ";
         }
-        std::cout << std::endl;
     }
 
-    GFpoly rem = remainder_code::find_remainder(msg, H);
-    std::cout << "Remainder: " << rem << std::endl;
-
-    std::vector<int> msg_error = {2, 2, 2, 1, 2, 1, 0, 0, 0, 0, 0, 0};  //! Debug this case. Error in root() function
-
-//    msg_error.resize(sc.n_strong);  //!!!
-//    auto decoded_msg = remainder_code::decode(msg_error, locators, H, rem);
-
-//    auto combs = remainder_code::find_locator_combinations(subfield_locators, sc.t_weak);
-//    auto decoded_msg = remainder_code::decode_multiuser(msg_error, locators, H, rem, combs, sc);
-    auto decoded_msg = remainder_code::decode_multiuser_separable(msg_error, locators, H, syndrome, sc);
-
-    std::cout << "-----------------------------------" << std::endl;
-    std::cout << "Decoded_codeword: ";
-    for (auto const & e : decoded_msg) {
-        std::cout << e << " ";
+    for (int i = 1; i < field.get_size(); i++) {
+        if (std::find(subfield.begin(), subfield.end(), i) == subfield.end())
+            field_locators.emplace_back(&field, i);
     }
-    std::cout << std::endl;
+
+    std::vector<Fint> msg = {1, 1, 2, 1, 0, 0, 1, 0, 1, 0, 0, 0};
+    std::vector<Fint> msg_strong(msg.begin(), msg.begin() + n_strong);
+
+    GFpoly g_x(&field, t_strong + 1); g_x[g_x.getDegree()] = 1;
+    GFpoly g_x_weak(&field, t_weak + 1); g_x_weak[g_x_weak.getDegree()] = 1;
+    auto field_locators_zero = field_locators; field_locators_zero.emplace_back(&field, 0);
+    auto g_x_l_x = roots_to_poly(field_locators_zero);
+
+    auto poly = locator_polynomial(subfield_locators, msg_strong);
+    auto qr = poly / g_x_l_x;
+    qr = qr[1] / g_x;
+    GFpoly rem_strong = qr[1];
+    std::cout << "Strong remainder: " << rem_strong << std::endl;
+
+    poly = locator_polynomial(locators, msg);
+    qr = poly / g_x_weak;
+    GFpoly rem_weak = qr[1];
+    std::cout << "Weak remainder: " << rem_weak << std::endl;
+
+    auto rem_common = GFpoly::convmod(rem_strong, rem_weak, g_x);
+    std::cout << "Common remainder: " << rem_common << std::endl;
+
+    std::vector<Fint> msg_error = {1, 1, 2, 1, 0, 0, 1, 0, 1, 1, 0, 0};
+    msg_strong = std::vector<Fint>(msg_error.begin(), msg_error.begin() + n_strong);
+    poly = locator_polynomial(subfield_locators, msg_strong);
+    qr = poly / g_x_l_x;
+    std::cout << "Received strong remainder: " << qr[1] << std::endl;
+    qr = qr[1] / g_x;
+    GFpoly rem_strong_received = qr[1];
+    std::cout << "Received strong remainder: " << rem_strong_received << std::endl;
+
+    auto u_strong = GFpoly::deconvmod(rem_strong_received, rem_strong, g_x);
+    std::cout << "Strong inc error poly: " << u_strong << std::endl;
 
     return 0;
 }

@@ -2,7 +2,7 @@
 // Created by ga1nenergy on 19.07.2019.
 //
 
-#include "gfpoly.h"
+#include "../../include/gfpoly.h"
 #include <vector>
 #include <algorithm>
 
@@ -322,10 +322,14 @@ namespace galoiscpp {
         GFpoly num, denom;
         (op1.degree > op2.degree) ? ({num = op1; denom = op2;}) : ({num = op2; denom = op1;});
 
+        std::cout << "degree " << denom.degree << ". " << denom << std::endl;
+
         while (denom.degree > degree) {
             auto qr = num / denom;
             num = denom;
             denom = qr[1];
+
+            std::cout << "degree " << denom.degree << ". " << denom << std::endl;
         }
 
         return denom;
@@ -341,12 +345,12 @@ namespace galoiscpp {
         GFpoly y2(field, 0); y2[0] = GFelement(field, 0);
         GFpoly y1(field, 0); y1[0] = GFelement(field, 1);
 
-//        int i = 1;
-//        cout << "Step " << i << endl;
-//        cout << "r2: " << r2 << endl;
-//        cout << "r1: " << r1 << endl;
-//        cout << "y2: " << y2 << endl;
-//        cout << "y1: " << y1 << endl;
+        int i = 1;
+        cout << "Step " << i << endl;
+        cout << "r2: " << r2 << endl;
+        cout << "r1: " << r1 << endl;
+        cout << "y2: " << y2 << endl;
+        cout << "y1: " << y1 << endl;
 
 
         while (r1.degree != 0) {
@@ -358,13 +362,13 @@ namespace galoiscpp {
             r2 = r1;
             r1 = qr[1];
 
-//            i++;
+            i++;
 
-//            cout << "Step " << i << endl;
-//            cout << "r2: " << r2 << endl;
-//            cout << "r1: " << r1 << endl;
-//            cout << "y2: " << y2 << endl;
-//            cout << "y1: " << y1 << endl;
+            cout << "Step " << i << endl;
+            cout << "r2: " << r2 << endl;
+            cout << "r1: " << r1 << endl;
+            cout << "y2: " << y2 << endl;
+            cout << "y1: " << y1 << endl;
         }
 
         std::pair<GFelement, GFpoly> res = {r1[0], y1};

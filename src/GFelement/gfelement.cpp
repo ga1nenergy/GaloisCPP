@@ -15,7 +15,7 @@
 #include <iostream>
 using namespace std;
 
-#include "gfelement.h"
+#include "../../include/gfelement.h"
 
 namespace galoiscpp
 {

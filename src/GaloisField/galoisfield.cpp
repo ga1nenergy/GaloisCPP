@@ -19,8 +19,8 @@
 using namespace std;
 
 #include <cassert>
-#include "galoisfield.h"
-#include "polynomial_arith.h"
+#include "../../include/galoisfield.h"
+#include "../Arith/polynomial_arith.h"
 #include "irreducible_poly.hpp"
 
 namespace galoiscpp

@@ -13,7 +13,7 @@
 *******************************************************************************/
 
 #include "galoisfield.h"
-#include "polynomial_arith.h"
+#include "../src/Arith/polynomial_arith.h"
 
 #include <iostream>
 

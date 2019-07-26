@@ -3,7 +3,7 @@
 //
 
 #include "representations.h"
-#include "galoisfield.h"
+#include "../../include/galoisfield.h"
 
 namespace galoiscpp {
     GFpoly roots_to_poly(GaloisField *field, const std::vector<Fint> &rts_int) {
