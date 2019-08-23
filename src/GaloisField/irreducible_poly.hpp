@@ -69,7 +69,36 @@ namespace galoiscpp {
                         break;
                 }
                 break;
-                //...
+            case 17:
+                switch (dim) {
+                    case 2:
+                        poly = {3, 1, 1};
+                        break;
+                }
+                break;
+            case 31:
+                switch (dim) {
+                    case 2:
+                        poly = {2, 1, 1};
+                        break;
+                }
+                break;
+            case 37:
+                switch (dim) {
+                    case 2:
+                        poly = {5, 1, 1};
+                        break;
+                }
+                break;
+            case 41:
+                switch (dim) {
+                    case 2:
+                        poly = {12, 1, 1};
+                        break;
+                }
+                break;
+            default:
+                throw std::logic_error("Field base not found");
         }
         memcpy(pointer, poly.data(), (dim + 1) * sizeof(Fint));
     }

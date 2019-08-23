@@ -16,11 +16,11 @@
    Polynomial arithmetic over a prime field
 */
 
-#include <cassert>
-#include "modular_arith.h"
-
 #ifndef POLYNOMIAL_ARITH_H
 #define POLYNOMIAL_ARITH_H
+
+#include <cassert>
+#include "modular_arith.h"
 
 namespace galoiscpp
 {

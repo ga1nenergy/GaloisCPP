@@ -2,35 +2,42 @@
 // Created by ga1nenergy on 19.07.2019.
 //
 
-#include <vector>
-#include "gfelement.h"
-
 #ifndef GALOISCPP_GFPOLY_H
 #define GALOISCPP_GFPOLY_H
+
+#include <vector>
+#include "GFelement/gfelement.h"
+#include "GaloisField/galoisfield.h"
 
 // LSB goes first!
 
 namespace galoiscpp {
 class GFpoly {
-    GaloisField* field;
+    GaloisField field;
     std::vector<GFelement> coefs;
     Fint degree;
 
     GFpoly reverse() const;
+    GFpoly cut_zeros() const;
 
 public:
     GFpoly();
     GFpoly(const std::vector<GFelement>& coefs);
-    GFpoly(GaloisField* gf);
-    GFpoly(GaloisField* gf, const std::vector<Fint>& coefs);
-    GFpoly(GaloisField *gf, Fint deg);
+    GFpoly(const GaloisField &gf);
+    GFpoly(const GaloisField &gf, const std::vector<Fint>& coefs);
+    GFpoly(const GaloisField &gf, Fint deg);
     GFpoly(const GFpoly &poly);
     ~GFpoly();
 
-    GFpoly& operator=(const GFpoly& lhs);
+    GFpoly& operator=(const GFpoly& rhs);
 
-    GFpoly operator+(const GFpoly &lhs) const;
-    GFpoly operator-(const GFpoly &lhs) const;
+    GFpoly operator+(const GFpoly &rhs) const;
+    GFpoly operator+(const GFelement &rhs) const;
+    GFpoly operator+(Fint rhs) const;
+    GFpoly operator+() const;
+    GFpoly operator-(const GFpoly &rhs) const;
+    GFpoly operator-(const GFelement &rhs) const;
+    GFpoly operator-(Fint rhs) const;
     GFpoly operator-() const;
 
     friend GFpoly operator*(const GFpoly &lhs, const GFpoly &rhs);
@@ -40,8 +47,8 @@ public:
     /* TODO
      * 1) Flip remainder (LSB goes first)
      */
-    std::vector<GFpoly> operator/(const GFpoly &lhs) const;
-    GFpoly operator/(const GFelement &lhs) const;
+    std::vector<GFpoly> operator/(const GFpoly &rhs) const;
+    GFpoly operator/(const GFelement &rhs) const;
 
     /* TODO
      * 1) add poly field compatibility here
@@ -58,26 +65,43 @@ public:
     GFelement& operator[](int idx);
     GFelement operator[](int idx) const;
 
-    // TODO
     static GFpoly conv(const GFpoly &op1, const GFpoly &op2);
     static GFpoly convmod(const GFpoly &op1, const GFpoly &op2, const GFpoly &mod);
     static std::vector<GFpoly> deconv(const GFpoly &op1, const GFpoly &op2);
+    static GFpoly deconvq(const GFpoly &op1, const GFpoly &op2);
+    static GFpoly deconvr(const GFpoly &op1, const GFpoly &op2);
     static GFpoly deconvmod(const GFpoly &op1, const GFpoly &op2, const GFpoly &mod);
 
+    GFpoly deriv() const;
+    static GFpoly deriv (const GFpoly &poly);
+
+    static GFpoly trace_as_poly(const GaloisField &field);
+
+    std::vector<GFpoly> find_splitting_functions() const;
+    static std::vector<GFpoly> find_splitting_functions(const GFpoly &poly);
 
     std::vector<GFelement> roots() const;
     static std::vector<GFelement> roots(const GFpoly& poly);
+
+    std::vector<GFelement> roots_exhaustive() const;
+    static std::vector<GFelement> roots_exhaustive(const GFpoly &poly);
+    std::vector<GFelement> roots_exhaustive(const std::vector<GFelement> &set) const;
+    static std::vector<GFelement> roots_exhaustive(const GFpoly &poly, const std::vector<GFelement> &set);
+    std::vector<GFelement> roots_prime() const;
+    static std::vector<GFelement> roots_prime(const GFpoly &poly);
+    std::vector<GFelement> roots1() const;
+    static std::vector<GFelement> roots1(const GFpoly& poly);
+    std::vector<GFelement> roots2() const;
+    static std::vector<GFelement> roots2(const GFpoly& poly);
 
     GFelement polyval(const GFelement& elem) const;
     GFelement polyval(Fint elem) const;
     static GFelement polyval(const GFpoly& poly, const GFelement& elem);
     static GFelement polyval(const GFpoly& poly, Fint elem);
 
-    /* TODO
-     * 1) check euclid methods
-     */
     static GFpoly euclid(const GFpoly &op1, const GFpoly &op2, Fint degree);
     static std::pair<GFelement, GFpoly> extended_euclid(const GFpoly &op1, const GFpoly &op2);
+    static GFpoly gcd(const GFpoly &op1, const GFpoly &op2);
 
     GFpoly inverse(const GFpoly &mod) const;
     static GFpoly inverse(const GFpoly &poly, const GFpoly &mod);
@@ -91,11 +115,15 @@ public:
      * 3) polyval           DONE
      * 4) euclid            DONE
      * 5) extended_euclid   DONE
+     * 6) roots_alg
+     * 7) gcd
+     * 8) trace_as_poly     DONE
      */
 
     // Getters
-    GaloisField* getField() const;
+    GaloisField getField() const;
     Fint getDegree() const;
+    std::vector<GFelement> getCoefs() const;
 };
 }
 

@@ -12,13 +12,13 @@
 
 *******************************************************************************/
 
-#include "galoisfield.h"
-#include "polynomial_arith.h"
-
-#include <iostream>
-
 #ifndef GFELEMENT_H
 #define GFELEMENT_H
+
+#include "GaloisField/galoisfield.h"
+#include "Arith/polynomial_arith.h"
+
+#include <iostream>
 
 namespace galoiscpp
 {
@@ -39,244 +39,60 @@ class GFelement
 {
 
     public:
-
-        //---------------------------
-        // constructors
-        //---------------------------
-
-        GFelement() : field(nullptr), degree(-1) {};
-
-        /**
-         Contructs GFelement without initializing its coefficients
-         @param gf pointer to a Galois Field
-        */
-        GFelement(GaloisField* gf) : field(gf), degree(0) {};
-
-
-        /**
-         Contructs a GFelement and initializes its coefficients
-         @param gf pointer to a Galois Field
-         @param poly an external array containing coefficients (length of array = dimension)
-        */
-        GFelement(GaloisField* gf, Fint degree) : field(gf), degree(degree) {};
-
-
-        /**
-         Constructs and clones a GFelement.
-         @param gfe reference to a GFelement
-        */
+        GFelement() : degree(-1) {};
+        GFelement(const GaloisField &gf, Fint degree) : field(gf), degree(degree) {};
         GFelement(const GFelement& gfe) : field(gfe.field), degree(gfe.degree) {};
+        ~GFelement() {};
 
-
-        /**
-         Destructs a GFelement and frees its allocated memory
-        */
-        ~GFelement() {field = nullptr; degree = -1;};
-
-
-        //---------------------------
-        // accessors
-        //---------------------------
-
-        /**
-         Returns the pointer to the GF this GFelement is associated with.
-        */
-        GaloisField* getField() const;
-
-
-        /**
-         Returns the i-th coefficient of this GFelement's polynomial
-         @param i the index to the i-th coefficient
-        */
-        Fint getDegree() const;
-
-
-        //---------------------------
-        // operators
-        //---------------------------
-
-        /**
-         Assigns/copies the values of another GFelement to this GFelement
-         @param right GFelement on the right of = sign
-         @returns GFelement on the left of = sign (this GFelement)
-        */
         GFelement& operator=(const GFelement& right);
-
-
         GFelement& operator=(Fint rhs);
 
-
-        /**
-         Returns the negated copy of this GFelement
-        */
-        GFelement operator-() const;
-
-
-        /**
-         Compares two GFelements, checks for equality
-         @param right GFelement on the right of == sign
-         @param left GFelement on the left of == sign
-         @returns true if equal, false otherwise
-        */
         friend bool operator==(const GFelement& left, const GFelement& right);
-
         friend bool operator==(Fint left, const GFelement& right);
         friend bool operator==(const GFelement& left, Fint right);
-
-        /**
-         Compares two GFelements, checks for inequality
-         @param right GFelement on the right of != sign
-         @param left GFelement on the left of != sign
-         @returns true if equal, false otherwise
-        */
         friend bool operator!=(const GFelement& left, const GFelement& right);
         friend bool operator!=(Fint left, const GFelement& right);
         friend bool operator!=(const GFelement& left, Fint right);
 
-
-        /**
-         Compares two GFelements based on their lexicographical ordering.
-         @param right GFelement on the right of < sign
-         @param left GFelement on the left of < sign
-         @returns true if left < right, false otherwise
-        */
         friend bool operator<(const GFelement& left, const GFelement& right);
-
-
-        /**
-         Compares two GFelements based on their lexicographical ordering.
-         @param right GFelement on the right of > sign
-         @param left GFelement on the left of > sign
-         @returns true if left > right, false otherwise
-        */
         friend bool operator>(const GFelement& left, const GFelement& right);
-
-
-        /**
-         Compares two GFelements based on their lexicographical ordering.
-         @param right GFelement on the right of <= sign
-         @param left GFelement on the left of <= sign
-         @returns true if left <= right, false otherwise
-        */
         friend bool operator<=(const GFelement& left, const GFelement& right);
-
-
-        /**
-         Compares two GFelements based on their lexicographical ordering.
-         @param right GFelement on the right of >= sign
-         @param left GFelement on the left of >= sign
-         @returns true if left >= right, false otherwise
-        */
         friend bool operator>=(const GFelement& left, const GFelement& right);
 
+        GFelement operator+(const GFelement& rhs) const;
+        GFelement operator+(Fint rhs);
+        GFelement operator-(const GFelement& rhs) const;
+        GFelement operator-(Fint rhs);
+        GFelement operator-() const;
 
-        /**
-         Adds two GFelements
-         @param right GFelement on the right of + sign
-         @param left GFelement on the left of + sign
-         @returns sum of two operands
-        */
-        GFelement operator+(const GFelement& lhs) const;
-
-
-        /**
-         Subtracts two GFelements
-         @param right GFelement on the right of - sign
-         @param left GFelement on the left of - sign
-         @returns difference of two operands
-        */
-        GFelement operator-(const GFelement& lhs) const;
-
-
-        /**
-         Multiplies two GFelements
-         @param right GFelement on the right of * sign
-         @param left GFelement on the left of * sign
-         @returns product of two operands
-        */
-        GFelement operator*(const GFelement& lhs) const;
-
-
-        /**
-         Divides two GFelements
-         @param right GFelement on the right of / sign
-         @param left GFelement on the left of / sign
-         @returns quotient of two operands
-        */
-        GFelement operator/(const GFelement& lhs) const;
-
-
-        /**
-         Multiplies a GFelement by a scalar (i.e. a Fint)
-         @param right GFelement on the right of * sign
-         @param left Fint on the left of * sign
-         @returns product of two operands
-        */
-        GFelement operator*(Fint left) const;
-
-
-        /**
-         Multiplies a GFelement by a scalar (i.e. a Fint)
-         @param right Fint on the right of * sign
-         @param left GFelement on the left of * sign
-         @returns product of two operands
-        */
+        GFelement operator*(const GFelement& rhs) const;
+        GFelement operator*(Fint rhs) const;
         friend GFelement operator*(const GFelement& left, Fint right);
-
-
-        /**
-         Divides a GFelement by a scalar (i.e. a Fint)
-         @param right Fint on the right of / sign
-         @param left GFelement on the left of / sign
-         @returns quotient of two operands
-         @throws ErrorDivideByZero
-        */
+        GFelement operator/(const GFelement& rhs) const;
         friend GFelement operator/(const GFelement& left, Fint right);
 
-
-        /**
-         Outputs a GFelement to the standard output
-         @param right GFelement on the right of << sign
-         @param output an output stream on the left of << sign
-         @returns output stream
-        */
         friend ostream& operator<<(ostream& output, const GFelement& right);
 
-
-        /**
-         Determines the multiplicative inverse of a GFelement.
-         @param gfe input GFelement
-         @returns GFelement (the multiplicative inverse of gfe)
-         @throws ErrorNoInverse, ErrorInvalidArraySize
-        */
         GFelement inverse() const;
 
-
-        /**
-         Raises a GFelement G to a positive integer power m
-
-         It uses the repeated square-and-multiply algorithm for exponentiation in GF(p^k).
-
-         (See Chapter 2, Algorithm 2.227 in Handbook of Applied Cryptography,
-         by Menezes, van Oorschot, Vanstone, CRC Press, 1996.)
-
-         @param G an input GFelement
-         @param m an input positive integer
-         @returns G raised to the power m
-         @throws ErrorInvalidArraySize, ErrorDivideByZero, ErrorIncompatibleFields
-        */
         GFelement power(Fint p) const;
-
         GFelement sum_times(Fint times) const;
+//        GFelement sum_times_table(Fint times) const;
+        GFelement summed_times(Fint times) const;
+        GFelement trace() const;
 
         static GFelement dot(const std::vector<GFelement> &op1, const std::vector<GFelement> &op2);
         static GFelement dotint(const std::vector<int> &op1, const std::vector<GFelement> &op2);
         static GFelement dotint(const std::vector<GFelement> &op2, const std::vector<int> &op1);
 
-        static std::vector<GFelement> to_gf(GaloisField *field, const std::vector<Fint> &vector);
+        static std::vector<GFelement> to_gf(const GaloisField &field, const std::vector<Fint> &vector);
+        std::vector<Fint> as_vector() const;
 
-private:
-        GaloisField* field;  // Galois Field associated with this polynomial
+        GaloisField getField() const;
+        Fint getDegree() const;
+
+    private:
+        GaloisField field;  // Galois Field associated with this polynomial
         Fint degree;
 };
 
@@ -286,7 +102,7 @@ private:
 // Inline class functions
 //------------------------------------------------
 
-inline GaloisField* GFelement::getField() const
+inline GaloisField GFelement::getField() const
 {
    return field;
 }

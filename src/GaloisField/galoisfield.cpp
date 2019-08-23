@@ -16,11 +16,13 @@
 #include <vector>
 #include <cmath>
 #include <cstring>
+#include <algorithm>
+#include <iterator>
 using namespace std;
 
 #include <cassert>
 #include "galoisfield.h"
-#include "polynomial_arith.h"
+#include "Arith/polynomial_arith.h"
 #include "irreducible_poly.hpp"
 
 namespace galoiscpp
@@ -87,7 +89,7 @@ ostream& operator<<(ostream& output, const GaloisField& gf)
     for (int i = 0; i < gf.size; i++) {
         output << i << ": ";
         for (int j = 0; j < gf.dimension; j++)
-            output << gf.field_table[i][j];
+            output << gf.field_table[i][j] << " ";
         output << endl;
     }
 
@@ -117,6 +119,18 @@ ostream& operator<<(ostream& output, const GaloisField& gf)
         output << i << ": " << gf.inv_table[i] << endl;
     }
 
+    output << endl << "Sum times table: " << endl;
+    for (auto const &row : gf.sum_times_table) {
+        std::copy(row.begin(), row.end(), std::ostream_iterator<int>(std::cout, " "));
+        std::cout << std::endl;
+    }
+
+    output << endl << "Summed times table: " << endl;
+    for (auto const &row : gf.sum_times_table_transposed) {
+        std::copy(row.begin(), row.end(), std::ostream_iterator<int>(std::cout, " "));
+        std::cout << std::endl;
+    }
+
     return output;
 }
 
@@ -132,7 +146,9 @@ void GaloisField::create_tables() {
 
         polynomialDivide(poly, i, reductpoly, dimension + 1, Q, i, R, i, modulus);
 
-        memcpy(field_table[i].data(), R, dimension * sizeof(Fint)); // sic!
+        for (int j = 0; j < i && j < dimension; j++) {
+            field_table[i][j] = R[j];
+        }
         delete [] poly; delete [] Q; delete [] R;
     }
 
@@ -188,60 +204,54 @@ void GaloisField::create_tables() {
         }
     }
 
-    // check
-//    cout << std::endl << "Multiplication table check: " << std::endl;
-//    for (int i = 1; i < size; i++) {
-//        for (int j = 1; j < size; j++) {
-//            Fint *res = new Fint[dimension*2];
-//            polynomialMultiply(field_table[i].data(), dimension,
-//                               field_table[j].data(), dimension,
-//                               res, 2*dimension, modulus);
-//
-//            Fint *res_rem = new Fint[dimension + 1];
-//            Fint* Q = new Fint[dimension + 1];
-//
-//            polynomialDivide(res, dimension + 1, reductpoly, dimension + 1, Q, dimension + 1, res_rem, dimension + 1, modulus);
-//
-//            for (int k = 0; k < size; k++) {
-//                if (!memcmp(res_rem, field_table[k].data(), dimension * sizeof(Fint))) {
-//                    std::cout << k << " ";
-//                }
-//            }
-//
-//            delete[] res; delete[] res_rem; delete[] Q;
-//        }
-//        std::cout << std::endl;
-//    }
-
     // 4) create inverse table
     inv_table = std::vector<Fint>(size, 0);
 
     for (int i = 1; i < size; i++) {
         inv_table[i] = (size - i) % (size - 1) + 1;
     }
+
+    int max = modulus;
+    for (auto i = 0; i < size; i++) {
+        std::vector<Fint> row(max, 0);
+        for (auto j = 0; j < max; j++) {
+            for (auto k = 1; k <= j; k++) {
+                row[j] = add(row[j], i);
+            }
+        }
+        sum_times_table.push_back(row);
+    }
+
+    for (auto i = 0; i < max; i++) {
+        std::vector<Fint> row(size);
+        for (auto j = 0; j < size; j++) {
+            row[j] = sum_times_table[j][i];
+        }
+        sum_times_table_transposed.push_back(row);
+    }
 }
 
-Fint GaloisField::add(Fint lhs, Fint rhs) {
+Fint GaloisField::add(Fint lhs, Fint rhs) const {
     return add_table[lhs][rhs];
 }
 
-Fint GaloisField::subtract(Fint lhs, Fint rhs) {
+Fint GaloisField::subtract(Fint lhs, Fint rhs) const {
     return sub_table[lhs][rhs];
 }
 
-Fint GaloisField::multiply(Fint lhs, Fint rhs) {
+Fint GaloisField::multiply(Fint lhs, Fint rhs) const {
     return mult_table[lhs][rhs];
 }
 
-Fint GaloisField::inverse(Fint op) {
+Fint GaloisField::inverse(Fint op) const {
     return inv_table[op];
 }
 
-std::vector<std::vector<Fint>> GaloisField::elems() {
+std::vector<std::vector<Fint>> GaloisField::elems() const {
     return field_table;
 }
 
-Fint GaloisField::get_size() {
+Fint GaloisField::get_size() const {
     return size;
 }
 
@@ -249,7 +259,7 @@ Fint GaloisField::get_size() {
  * 1) think how to combine instances of a field and its subfield
  * 2) improve "while-loop" logic
  */
-std::vector<Fint> GaloisField::find_subfield(int sub_m) {
+std::vector<Fint> GaloisField::find_subfield(int sub_m) const {
     if (sub_m < 1) {
         throw std::logic_error("Field extension must be a natural number");
     }
@@ -270,5 +280,65 @@ std::vector<Fint> GaloisField::find_subfield(int sub_m) {
 
     return set;
 }
+
+    bool operator==(const GaloisField &lhs, const GaloisField &rhs) {
+        return lhs.modulus == rhs.modulus && lhs.dimension == rhs.dimension && lhs.size == rhs.size &&
+               !memcmp(lhs.reductpoly, rhs.reductpoly, (lhs.dimension + 1) * sizeof(Fint));
+    }
+
+    bool operator!=(const GaloisField &lhs, const GaloisField &rhs) {
+        return !(lhs == rhs);
+    }
+
+    GaloisField& GaloisField::operator=(const GaloisField &gf) {
+        modulus = gf.modulus;
+        dimension = gf.dimension;
+
+        reductpoly = new Fint[dimension + 1];
+        memcpy(reductpoly, gf.reductpoly, (dimension + 1) * sizeof(Fint));
+
+        size = gf.size;
+        field_table = gf.field_table;
+        add_table = gf.add_table;
+        sub_table = gf.sub_table;
+        mult_table = gf.mult_table;
+        inv_table = gf.inv_table;
+        sum_times_table = gf.sum_times_table;
+        sum_times_table_transposed = gf.sum_times_table_transposed;
+
+        return *this;
+    }
+
+    GaloisField::GaloisField(const GaloisField &gf) {
+        modulus = gf.modulus;
+        dimension = gf.dimension;
+
+        reductpoly = new Fint[dimension + 1];
+        memcpy(reductpoly, gf.reductpoly, (dimension + 1) * sizeof(Fint));
+
+        size = gf.size;
+        field_table = gf.field_table;
+        add_table = gf.add_table;
+        sub_table = gf.sub_table;
+        mult_table = gf.mult_table;
+        inv_table = gf.inv_table;
+        sum_times_table = gf.sum_times_table;
+        sum_times_table_transposed = gf.sum_times_table_transposed;
+    }
+
+    Fint GaloisField::sum_times(Fint op, int times) const {
+        return sum_times_table[op][times];
+    }
+
+    Fint GaloisField::summed_times(Fint times, Fint res) const {
+        auto elem = std::find(sum_times_table_transposed[times].begin(),
+                              sum_times_table_transposed[times].end(),
+                              res);
+        if (elem != sum_times_table_transposed[times].end()) {
+            return *elem;
+        } else {
+            throw std::logic_error("elem not found");
+        }
+    }
 
 } // namespace shk_galoiscpp

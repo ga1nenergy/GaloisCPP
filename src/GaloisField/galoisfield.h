@@ -12,14 +12,14 @@
 
 **********************************************************************/
 
+#ifndef GALOISFIELD_H
+#define GALOISFIELD_H
+
 #include "typedefs.h"
 
 #include <ostream>
 #include <cassert>
 #include <vector>
-
-#ifndef GALOISFIELD_H
-#define GALOISFIELD_H
 
 
 namespace galoiscpp
@@ -44,6 +44,8 @@ class GaloisField
       //---------------------------
       // constructors
       //---------------------------
+      GaloisField() : modulus(-1), dimension(-1), reductpoly(nullptr), size(-1) {};
+
       /**
          Constructs a Galois Field (GF)
          @param mod a positive prime integer (the modulus of GF)
@@ -54,6 +56,8 @@ class GaloisField
       GaloisField(Fint mod, Int dim, Fint poly[]);
 
       GaloisField(Fint mod, Int dim);
+
+      GaloisField(const GaloisField &gf);
 
       /**
          Destructs GaloisField, freeing allocated space for reduction polynomial in it.
@@ -87,16 +91,24 @@ class GaloisField
       */
       friend std::ostream& operator<<(std::ostream& output, const GaloisField& gf);
 
+      friend bool operator==(const GaloisField &lhs, const GaloisField &rhs);
+      friend bool operator!=(const GaloisField &lhs, const GaloisField &rhs);
+
+      GaloisField& operator=(const GaloisField &rhs);
+
       // Getters
-      std::vector<std::vector<Fint>> elems();
-      Fint add(Fint lhs, Fint rhs);
-      Fint subtract(Fint lhs, Fint rhs);
-      Fint multiply(Fint lhs, Fint rhs);
-      Fint inverse(Fint op);
+      std::vector<std::vector<Fint>> elems() const;
+      Fint add(Fint lhs, Fint rhs) const;
+      Fint subtract(Fint lhs, Fint rhs) const;
+      Fint multiply(Fint lhs, Fint rhs) const;
+      Fint inverse(Fint op) const;
 
-      Fint get_size();
+      Fint sum_times(Fint op, int times) const;
+      Fint summed_times(Fint times, Fint res) const;
 
-      std::vector<Fint> find_subfield(int sub_m);
+      Fint get_size() const;
+
+      std::vector<Fint> find_subfield(int sub_m) const;
 
       /* TODO
        * 1) get rid of all C-like stuff
@@ -113,32 +125,15 @@ class GaloisField
       std::vector<std::vector<Fint>> mult_table;            // a table for multiplication
       std::vector<Fint> inv_table;             // table inverse elems
 
+      std::vector<std::vector<Fint>> sum_times_table;
+      std::vector<std::vector<Fint>> sum_times_table_transposed;
+
       void create_tables();
 };
 
-
-
-//--------------------------------------
-// Inline class functions
-//--------------------------------------
-
-inline Fint GaloisField::getModulus() const
-{
-   return modulus;
-}
-
-
-inline Int GaloisField::getDimension() const
-{
-   return dimension;
-}
-
-
-inline Fint GaloisField::reductionPolynomial(Int i) const
-{
-   return reductpoly[i];
-}
-
+inline Fint GaloisField::getModulus() const { return modulus; }
+inline Int GaloisField::getDimension() const { return dimension; }
+inline Fint GaloisField::reductionPolynomial(Int i) const { return reductpoly[i]; }
 
 } // namespace shk_galoiscpp
 
