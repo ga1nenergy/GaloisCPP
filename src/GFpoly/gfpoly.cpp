@@ -22,17 +22,17 @@ namespace galoiscpp {
         this->degree = static_cast<Fint>(coefs.size()) - 1;
     }
 
-    GFpoly::GFpoly(const GaloisField &field) {
-        this->field= field;
+    GFpoly::GFpoly(const GaloisField *field) {
+        this->field = field;
     }
 
-    GFpoly::GFpoly(const GaloisField &field, const vector<Fint> &coefs) {
+    GFpoly::GFpoly(const GaloisField *field, const vector<Fint> &coefs) {
         this->field = field;
         this->degree = static_cast<Fint>(coefs.size()) - 1;
         for (auto & coef : coefs) this->coefs.emplace_back(field, coef);
     }
 
-    GFpoly::GFpoly(const GaloisField &field, Fint degree) {
+    GFpoly::GFpoly(const GaloisField *field, Fint degree) {
         this->field = field;
         this->degree = degree;
         for (int i = 0; i < degree + 1; i++) coefs.emplace_back(field, 0);
@@ -364,11 +364,11 @@ namespace galoiscpp {
         return poly.deriv();
     }
 
-    GFpoly GFpoly::trace_as_poly(const GaloisField &field) {
-        GFpoly tr(field, pow(field.getModulus(), field.getDimension() - 1));
+    GFpoly GFpoly::trace_as_poly(const GaloisField *field) {
+        GFpoly tr(field, pow(field->getModulus(), field->getDimension() - 1));
 
-        for (auto i = 0; i < field.getDimension(); i++) {
-            tr[(int)pow(field.getModulus(), i)] = 1;
+        for (auto i = 0; i < field->getDimension(); i++) {
+            tr[(int)pow(field->getModulus(), i)] = 1;
         }
 
         return tr;
@@ -381,7 +381,7 @@ namespace galoiscpp {
         std::vector<std::vector<GFelement>> B(degree);
         std::vector<GFpoly> factors(degree);
         for (auto i = 0; i < degree; i++) {
-            GFpoly px(field, i * field.get_size()); px[px.degree] = 1;
+            GFpoly px(field, i * field->get_size()); px[px.degree] = 1;
             px = deconvr(px, *this);
             factors[i] = px;
 
@@ -419,7 +419,7 @@ namespace galoiscpp {
     std::vector<GFelement> GFpoly::roots_exhaustive() const {
         std::vector<GFelement> rts;
 
-        for (int i = 0; i < field.get_size(); i++) {
+        for (int i = 0; i < field->get_size(); i++) {
             if (this->polyval(i) == 0) {
                 GFelement rt = GFelement(field, i);
 
@@ -470,10 +470,10 @@ namespace galoiscpp {
                 GFpoly q = *this, r;
                 while (true) {
                     auto qr = q / root_poly;
-                    q = qr[0]; //cout << "q: " << q << endl;
-                    r = qr[1]; //cout << "r: " << r << endl;
+                    q = qr[0]; // cout << "q: " << q << endl;
+                    r = qr[1]; // cout << "r: " << r << endl;
 
-                    if (r[0] != 0 || r.degree != 0)
+                    if (r[0] != 0 || r.degree != 0 || q[q.getDegree()] == 0)
                         break;
 
                     rts.push_back(rt);
@@ -507,7 +507,7 @@ namespace galoiscpp {
         auto tr_poly = trace_as_poly(this->field);
 
         // main_poly = x^q + x
-        GFpoly main_poly(field, pow(field.getModulus(), field.getDimension()));
+        GFpoly main_poly(field, field->get_size());
         main_poly[1] = 1; main_poly[main_poly.getDegree()] = 1;
 
         {};
@@ -521,10 +521,10 @@ namespace galoiscpp {
     std::vector<GFelement> GFpoly::roots2() const {
         std::vector<GFpoly> f_k_array;
         GFpoly F(field, 0); F[0] = 1;
-        for (auto k = 0; k < field.getDimension(); k++) {
+        for (auto k = 0; k < field->getDimension(); k++) {
             auto f_k = *this;
             for (auto j = 0; j <= f_k.getDegree(); j++) {
-                f_k[j] = f_k[j].power(pow(field.getModulus(), k));
+                f_k[j] = f_k[j].power(pow(field->getModulus(), k));
             }
             F = F * f_k;
         }
@@ -572,12 +572,32 @@ namespace galoiscpp {
         return denom;
     }
 
+    std::vector<GFpoly> GFpoly::euclid_list(const GFpoly &op1, const GFpoly &op2) {
+        GFpoly num, denom;
+        (op1.degree > op2.degree) ? ({num = op1; denom = op2;}) : ({num = op2; denom = op1;});
+
+//        std::cout << "degree " << denom.degree << ". " << denom << std::endl;
+        std::vector<GFpoly> rems;
+
+        while (denom.degree > 0) {
+            rems.push_back(denom);
+            auto qr = num / denom;
+            num = denom;
+            denom = qr[1];
+//            std::cout << "degree " << denom.degree << ". " << denom << std::endl;
+        }
+
+        rems.push_back(denom);
+
+        return rems;
+    }
+
     /* TODO
      * 1) add field compatibility check
      */
 
     std::pair<GFelement, GFpoly> GFpoly::extended_euclid(const GFpoly &op1, const GFpoly &op2) {
-        GaloisField field = op1.getField();
+        const GaloisField *field = op1.getField();
         GFpoly r2 = op2, r1 = op1;
         GFpoly y2(field, 0); y2[0] = GFelement(field, 0);
         GFpoly y1(field, 0); y1[0] = GFelement(field, 1);
@@ -643,7 +663,7 @@ namespace galoiscpp {
     }
 
     // Getters
-    GaloisField GFpoly::getField() const {
+    const GaloisField* GFpoly::getField() const {
         if (!coefs.empty()) {
             return coefs[0].getField();
         } else {

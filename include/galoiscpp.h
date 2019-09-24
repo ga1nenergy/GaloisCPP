@@ -9,7 +9,7 @@
 #include "GaloisField/galoisfield.h"
 #include "GFelement/gfelement.h"
 #include "GFpoly/gfpoly.h"
-#include "Aux/representations.h"
+#include "Auxillary/representations.h"
 #include "typedefs.h"
 
 #endif //GALOISCPP_GALOISCPP_H

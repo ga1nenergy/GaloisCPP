@@ -7,7 +7,6 @@
 
 #include "GFpoly/gfpoly.h"
 #include "GFelement/gfelement.h"
-#include "typedefs.h"
 
 #include <vector>
 

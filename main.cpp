@@ -15,28 +15,28 @@ int main() {
 
     std::vector<Fint> subfield = field.find_subfield(1);
 
-    std::vector<GFelement> subfield_locators = GFelement::to_gf(field, subfield);
+    std::vector<GFelement> subfield_locators = GFelement::to_gf(&field, subfield);
     subfield_locators.resize(n_strong);
 
     std::vector<GFelement> locators = subfield_locators;
     std::vector<GFelement> field_locators;
     for (int i = 1; i < field.get_size() && locators.size() < n; i++) {
         if (std::find(subfield.begin(), subfield.end(), i) == subfield.end()) {
-            locators.emplace_back(field, i);
+            locators.emplace_back(&field, i);
         }
     }
 
     for (int i = 1; i < field.get_size(); i++) {
         if (std::find(subfield.begin(), subfield.end(), i) == subfield.end())
-            field_locators.emplace_back(field, i);
+            field_locators.emplace_back(&field, i);
     }
 
     std::vector<int> msg = {1, 1, 2, 1, 0, 0, 1, 0, 1, 0, 0, 0};
     std::vector<int> msg_strong(msg.begin(), msg.begin() + n_strong);
 
-    GFpoly g_x(field, t_strong + 1); g_x[g_x.getDegree()] = 1;
-    GFpoly g_x_weak(field, t_weak + 1); g_x_weak[g_x_weak.getDegree()] = 1;
-    auto field_locators_zero = field_locators; field_locators_zero.emplace_back(field, 0);
+    GFpoly g_x(&field, t_strong + 1); g_x[g_x.getDegree()] = 1;
+    GFpoly g_x_weak(&field, t_weak + 1); g_x_weak[g_x_weak.getDegree()] = 1;
+    auto field_locators_zero = field_locators; field_locators_zero.emplace_back(&field, 0);
     auto g_x_l_x = roots_to_poly(field_locators_zero);
 
     auto poly = locator_polynomial(subfield_locators, msg_strong);

@@ -6,7 +6,7 @@
 #include "GaloisField/galoisfield.h"
 
 namespace galoiscpp {
-    GFpoly roots_to_poly(const GaloisField &field, const std::vector<int> &rts_int) {
+    GFpoly roots_to_poly(const GaloisField *field, const std::vector<int> &rts_int) {
         std::vector<GFelement> rts;
         for (auto & elem : rts_int) rts.emplace_back(field, elem);
 
@@ -22,7 +22,7 @@ namespace galoiscpp {
             throw std::logic_error("Input array is empty");
         }
 
-        GaloisField field = rts[0].getField();
+        const GaloisField *field = rts[0].getField();
 
         GFpoly res(field, 0);
         res[0] = GFelement(field, 1);
@@ -67,7 +67,7 @@ namespace galoiscpp {
         return res;
     }
 
-    GFpoly locator_polynomial(const GaloisField &field, const std::vector<Fint> &locators, const std::vector<int> &msg) {
+    GFpoly locator_polynomial(const GaloisField *field, const std::vector<Fint> &locators, const std::vector<int> &msg) {
         std::vector<GFelement> locators_gf;
         for (auto & elem : locators) locators_gf.emplace_back(field, elem);
 

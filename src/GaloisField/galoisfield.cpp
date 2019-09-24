@@ -60,6 +60,8 @@ GaloisField::GaloisField(Fint mod, Int dim) {
 
    get_irreducible_poly(modulus, dimension, reductpoly);
    create_tables();
+
+   std::cout << "Field is created!. Adress: " << this << std::endl;
 }
 
 
@@ -335,7 +337,7 @@ std::vector<Fint> GaloisField::find_subfield(int sub_m) const {
                               sum_times_table_transposed[times].end(),
                               res);
         if (elem != sum_times_table_transposed[times].end()) {
-            return *elem;
+            return (elem - sum_times_table_transposed[times].begin());
         } else {
             throw std::logic_error("elem not found");
         }

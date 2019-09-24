@@ -6,7 +6,7 @@ include_directories("src" "include")
 
 add_subdirectory(src/Algorithms)
 add_subdirectory(src/Arith)
-add_subdirectory(src/Aux)
+add_subdirectory(src/Auxillary)
 add_subdirectory(src/GaloisField)
 add_subdirectory(src/GFelement)
 add_subdirectory(src/GFpoly)

@@ -7,13 +7,12 @@
 
 #include <vector>
 #include "GFelement/gfelement.h"
-#include "GaloisField/galoisfield.h"
 
 // LSB goes first!
 
 namespace galoiscpp {
 class GFpoly {
-    GaloisField field;
+    const GaloisField* field;
     std::vector<GFelement> coefs;
     Fint degree;
 
@@ -23,9 +22,9 @@ class GFpoly {
 public:
     GFpoly();
     GFpoly(const std::vector<GFelement>& coefs);
-    GFpoly(const GaloisField &gf);
-    GFpoly(const GaloisField &gf, const std::vector<Fint>& coefs);
-    GFpoly(const GaloisField &gf, Fint deg);
+    GFpoly(const GaloisField *gf);
+    GFpoly(const GaloisField *gf, const std::vector<Fint>& coefs);
+    GFpoly(const GaloisField *gf, Fint deg);
     GFpoly(const GFpoly &poly);
     ~GFpoly();
 
@@ -75,7 +74,7 @@ public:
     GFpoly deriv() const;
     static GFpoly deriv (const GFpoly &poly);
 
-    static GFpoly trace_as_poly(const GaloisField &field);
+    static GFpoly trace_as_poly(const GaloisField *field);
 
     std::vector<GFpoly> find_splitting_functions() const;
     static std::vector<GFpoly> find_splitting_functions(const GFpoly &poly);
@@ -100,6 +99,7 @@ public:
     static GFelement polyval(const GFpoly& poly, Fint elem);
 
     static GFpoly euclid(const GFpoly &op1, const GFpoly &op2, Fint degree);
+    static std::vector<GFpoly> euclid_list(const GFpoly &op1, const GFpoly &op2);
     static std::pair<GFelement, GFpoly> extended_euclid(const GFpoly &op1, const GFpoly &op2);
     static GFpoly gcd(const GFpoly &op1, const GFpoly &op2);
 
@@ -121,7 +121,7 @@ public:
      */
 
     // Getters
-    GaloisField getField() const;
+    const GaloisField* getField() const;
     Fint getDegree() const;
     std::vector<GFelement> getCoefs() const;
 };

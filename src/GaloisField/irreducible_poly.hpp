@@ -72,28 +72,77 @@ namespace galoiscpp {
             case 17:
                 switch (dim) {
                     case 2:
-                        poly = {3, 1, 1};
+                        poly = {1, 1, 3};
+                        break;
+                }
+                break;
+            case 19:
+                switch (dim) {
+                    case 2:
+                        poly = {1, 1, 2};
+                        break;
+                }
+                break;
+            case 23:
+                switch (dim) {
+                    case 2:
+                        poly = {1, 1, 7};
+                        break;
+                }
+                break;
+            case 29:
+                switch (dim) {
+                    case 2:
+                        poly = {1, 1, 3};
                         break;
                 }
                 break;
             case 31:
                 switch (dim) {
                     case 2:
-                        poly = {2, 1, 1};
+                        poly = {1, 1, 2};
                         break;
                 }
                 break;
             case 37:
                 switch (dim) {
                     case 2:
-                        poly = {5, 1, 1};
+                        poly = {1, 1, 5};
                         break;
                 }
                 break;
             case 41:
                 switch (dim) {
                     case 2:
-                        poly = {12, 1, 1};
+                        poly = {1, 1, 12};
+                        break;
+                }
+                break;
+            case 43:
+                switch (dim) {
+                    case 2:
+                        poly = {1, 1, 3};
+                        break;
+                }
+                break;
+            case 47:
+                switch (dim) {
+                    case 2:
+                        poly = {1, 1, 13};
+                        break;
+                }
+                break;
+            case 53:
+                switch (dim) {
+                    case 2:
+                        poly = {1, 1, 5};
+                        break;
+                }
+                break;
+            case 223:
+                switch (dim) {
+                    case 1:
+                        poly = {1, 9};
                         break;
                 }
                 break;

@@ -40,7 +40,7 @@ class GFelement
 
     public:
         GFelement() : degree(-1) {};
-        GFelement(const GaloisField &gf, Fint degree) : field(gf), degree(degree) {};
+        GFelement(const GaloisField *gf, Fint degree) : field(gf), degree(degree) {};
         GFelement(const GFelement& gfe) : field(gfe.field), degree(gfe.degree) {};
         ~GFelement() {};
 
@@ -85,14 +85,14 @@ class GFelement
         static GFelement dotint(const std::vector<int> &op1, const std::vector<GFelement> &op2);
         static GFelement dotint(const std::vector<GFelement> &op2, const std::vector<int> &op1);
 
-        static std::vector<GFelement> to_gf(const GaloisField &field, const std::vector<Fint> &vector);
+        static std::vector<GFelement> to_gf(const GaloisField *field, const std::vector<Fint> &vector);
         std::vector<Fint> as_vector() const;
 
-        GaloisField getField() const;
+        const GaloisField* getField() const;
         Fint getDegree() const;
 
     private:
-        GaloisField field;  // Galois Field associated with this polynomial
+        const GaloisField *field;  // Galois Field associated with this polynomial
         Fint degree;
 };
 
@@ -102,7 +102,7 @@ class GFelement
 // Inline class functions
 //------------------------------------------------
 
-inline GaloisField GFelement::getField() const
+inline const GaloisField* GFelement::getField() const
 {
    return field;
 }
