@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 
 namespace galoiscpp {
     GFpoly::GFpoly() = default;
@@ -238,12 +239,30 @@ namespace galoiscpp {
 //            std::cout << "r after: " << r << std::endl;
 
             q.insert(q.begin(), coef);
+//            std::cout << "q_iter: ";
+//            std::copy(q.begin(), q.end(), std::ostream_iterator<GFelement>(std::cout, " "));
+//            std::cout << std::endl;
         }
 
         while (r[r.degree] == 0 && r.degree != 0) {
             r.coefs.pop_back();
             r.degree--;
         }
+
+//        auto i = std::find_if(std::rbegin(r.coefs), std::rend(r.coefs), [](auto& v) { return v != 0; } );
+//        auto diff = std::distance(std::begin(r.coefs), i.base());
+//
+//        if (diff == 0){
+//            r.coefs.resize(diff + 1);
+//            r.degree = diff;
+//        } else {
+//            r.coefs.resize(diff);
+//            r.degree = diff - 1;
+//        }
+//
+//        i = std::find_if(std::rbegin(q), std::rend(q), [](auto& v) { return v != 0; } );
+//        diff = std::distance(std::begin(q), i.base());
+//        (diff == 0) ? (q.resize(diff + 1)) : (q.resize(diff));
 
         qr[0] = GFpoly(q);
         qr[1] = r;
@@ -436,6 +455,7 @@ namespace galoiscpp {
 
                 GFpoly q = *this, r;
                 while (true) {
+//                    std::cout << "q: " << q << std::endl;
                     auto qr = q / root_poly;
                     q = qr[0]; //cout << "q: " << q << endl;
                     r = qr[1]; //cout << "r: " << r << endl;
@@ -545,6 +565,10 @@ namespace galoiscpp {
 
     bool GFpoly::empty() {
         return coefs.empty();
+    }
+
+    bool GFpoly::isZero() {
+        return (degree == 0 && coefs[0] == 0);
     }
 
     GFelement GFpoly::polyval(const GFpoly &poly, const GFelement &elem) {
@@ -677,5 +701,14 @@ namespace galoiscpp {
 
     std::vector<GFelement> GFpoly::getCoefs() const {
         return coefs;
+    }
+
+    std::vector<int> GFpoly::getCoefsRaw() const {
+        std::vector<int> raw(coefs.size());
+        for (auto i = 0; i < coefs.size(); i++) {
+            raw[i] = coefs[i].getDegree();
+        }
+
+        return raw;
     }
 }

@@ -107,6 +107,7 @@ public:
     static GFpoly inverse(const GFpoly &poly, const GFpoly &mod);
 
     bool empty();
+    bool isZero();
 
 
     /* TODO:
@@ -124,6 +125,7 @@ public:
     const GaloisField* getField() const;
     Fint getDegree() const;
     std::vector<GFelement> getCoefs() const;
+    std::vector<int> getCoefsRaw() const;
 };
 }
 

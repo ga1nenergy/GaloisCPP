@@ -61,7 +61,7 @@ GaloisField::GaloisField(Fint mod, Int dim) {
    get_irreducible_poly(modulus, dimension, reductpoly);
    create_tables();
 
-   std::cout << "Field is created!. Adress: " << this << std::endl;
+   std::cout << "Field is created!. Address: " << this << std::endl;
 }
 
 
@@ -70,7 +70,6 @@ GaloisField::~GaloisField()
 {
    delete [] reductpoly;
 }
-
 
 //------------------------------------------------------
 ostream& operator<<(ostream& output, const GaloisField& gf)

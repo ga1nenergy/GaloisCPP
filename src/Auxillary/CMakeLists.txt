@@ -1,1 +1,1 @@
-add_library(Aux representations.cpp)
+add_library(Auxillary misc.hpp representations.cpp)

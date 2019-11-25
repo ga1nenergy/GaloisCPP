@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <numeric>
 
 namespace galoiscpp {
     /* TODO
@@ -156,12 +157,12 @@ namespace galoiscpp {
 //            }
         }
 
-        for (auto & row : transformed_matrix) {
-            for (auto & e : row) {
-                std::cout << e << " ";
-            }
-            std::cout << std::endl;
-        }
+//        for (auto & row : transformed_matrix) {
+//            for (auto & e : row) {
+//                std::cout << e << " ";
+//            }
+//            std::cout << std::endl;
+//        }
 
         return transformed_matrix;
     }
@@ -170,6 +171,11 @@ namespace galoiscpp {
  * 1) improve logic
  */
     std::vector<std::vector<GFelement>> gauss_method(const std::vector<std::vector<GFelement>> &matrix) {
+        bool DEBUG = true;
+
+        std::vector<int> permutations(matrix.size());
+        std::iota(permutations.begin(), permutations.end(), 0);
+
         size_t r = matrix.size();
         size_t n = matrix[0].size();
 
@@ -177,27 +183,62 @@ namespace galoiscpp {
 
         // Forward
         for (size_t i = 0; i < r; i++) {
-            auto coef = transformed_matrix[i][i].inverse();
-            for (size_t j = i; j < n; j++) {
-                transformed_matrix[i][j] = transformed_matrix[i][j] * coef;
+            if (transformed_matrix[i][i] == 0) {
+                for (auto j = i + 1; j < transformed_matrix.size(); j++) {
+                    if (transformed_matrix[j][i] != 0) {
+                        iter_swap(transformed_matrix.begin() + i, transformed_matrix.begin() + j);
+                        iter_swap(permutations.begin() + i, permutations.begin() + j);
+                    }
+                }
             }
+
+            auto coef = transformed_matrix[i][i].inverse();
+            if (coef != 0) {
+                for (size_t j = i; j < n; j++) {
+                    transformed_matrix[i][j] = transformed_matrix[i][j] * coef;
+                }
+            }
+
+//            for (size_t j = i + 1; j < r; j++) {
+//                coef = transformed_matrix[j][i];
+//                for (size_t p = i; p < n; p++) {
+//                    if (coef != 0) {
+//                        transformed_matrix[j][p] = transformed_matrix[j][p] - coef * transformed_matrix[i][p];
+//                    }
+//                }
+//            }
 
             for (size_t j = i + 1; j < r; j++) {
                 coef = transformed_matrix[j][i];
-                if (coef != 0) {
-                    for (size_t p = i; p < n; p++) {
+                for (size_t p = i; p < n; p++) {
+                    if (transformed_matrix[i][p] != 0)
+
+                    if (coef != 0) {
                         transformed_matrix[j][p] = transformed_matrix[j][p] - coef * transformed_matrix[i][p];
                     }
                 }
             }
+
+            if (DEBUG) {
+                std::cout << std::endl << "Fwd. Step " << i << ": " << std::endl;
+                for (auto &row : transformed_matrix) {
+                    for (auto &e : row) {
+                        std::cout << e << " ";
+                    }
+                    std::cout << std::endl;
+                }
+            }
         }
 
-//        for (auto & row : transformed_matrix) {
-//            for (auto &e : row) {
-//                std::cout << e << " ";
-//            }
-//            std::cout << std::endl;
-//        }
+        if (DEBUG) {
+            std::cout << std::endl << "Forward: " << std::endl;
+            for (auto &row : transformed_matrix) {
+                for (auto &e : row) {
+                    std::cout << e << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
 
         // Backward
         for (int i = r - 1; i >= 0; i--) {
@@ -209,14 +250,27 @@ namespace galoiscpp {
                     }
                 }
             }
+
+            if (DEBUG) {
+                std::cout << std::endl << "Bkw. Step " << i << ": " << std::endl;
+                for (auto &row : transformed_matrix) {
+                    for (auto &e : row) {
+                        std::cout << e << " ";
+                    }
+                    std::cout << std::endl;
+                }
+            }
         }
 
-//        for (auto & row : transformed_matrix) {
-//            for (auto & e : row) {
-//                std::cout << e << " ";
-//            }
-//            std::cout << std::endl;
-//        }
+        if (DEBUG) {
+            std::cout << std::endl << "Backward: " << std::endl;
+            for (auto &row : transformed_matrix) {
+                for (auto &e : row) {
+                    std::cout << e << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
 
         return transformed_matrix;
     }
@@ -267,5 +321,38 @@ namespace galoiscpp {
 //        }
 
         return transformed_matrix;
+    }
+
+    GFpoly lagrange_interpolation(const std::vector<GFelement> &x, const std::vector<GFelement> &y) {
+        auto DEBUG = false;
+        const GaloisField *gf = y[0].getField();
+
+        GFpoly f_x(gf, 0); f_x[0] = 0;
+        for (auto i = 0; i < x.size(); i++) {
+            if (DEBUG) {
+                std::cout << "Start of iter #" << i << std::endl;
+                std::cout << "f_x: " << f_x << std::endl;
+            }
+
+            GFpoly prod(gf, 0); prod[0] = 1;
+            for (auto j = 0; j < y.size(); j++) {
+                if (x[i] != x[j]) {
+                    GFpoly buf(gf, 1);
+                    buf[0] = -x[j]; buf[1] = 1;
+                    prod = prod * (buf / (x[i] - x[j]));
+                }
+
+                if (DEBUG) {
+                    std::cout << "Prod: " << prod << std::endl;
+                }
+            }
+            f_x = f_x + y[i] * prod;
+            if (DEBUG) {
+                std::cout << "End of iter #" << i << std::endl;
+                std::cout << "f_x: " << f_x << std::endl;
+            }
+        }
+
+        return f_x;
     }
 }

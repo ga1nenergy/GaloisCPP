@@ -282,7 +282,7 @@ GFelement GFelement::trace() const {
 /* TODO
  * 1) add fields compatibility check
  */
-    GFelement GFelement::dot(const std::vector<GFelement> &op1, const std::vector<GFelement> &op2) {
+GFelement GFelement::dot(const std::vector<GFelement> &op1, const std::vector<GFelement> &op2) {
     if (op1.size() != op2.size())
         throw std::logic_error("Operands length must match");
 
@@ -294,6 +294,25 @@ GFelement GFelement::trace() const {
     }
 
     return s;
+}
+
+GFelement GFelement::dot(const std::vector<GFelement> &op1, const std::vector<int> &op2) {
+    if (op1.size() != op2.size())
+        throw std::logic_error("Operands length must match");
+
+    auto field = op1[0].getField();
+
+    GFelement s(field, 0);
+    for (size_t i = 0; i < op1.size(); i++) {
+//        std::cout << op1[i] << " * " << op2[i] << " = " << op1[i] * GFelement(field, op2[i]) << std::endl;
+        s = s + op1[i] * GFelement(field, op2[i]);
+    }
+
+    return s;
+}
+
+GFelement GFelement::dot(const std::vector<int> &op1, const std::vector<GFelement> &op2) {
+    return dot(op2, op1);
 }
 
 GFelement GFelement::dotint(const std::vector<int> &op1, const std::vector<GFelement> &op2) {

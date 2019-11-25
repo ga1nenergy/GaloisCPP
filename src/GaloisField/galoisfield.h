@@ -71,12 +71,12 @@ class GaloisField
       /**
          Returns modulus of GF.
       */
-      Fint getModulus() const;
+      virtual Fint getModulus() const;
 
       /**
          Returns dimension of GF
       */
-      Int getDimension() const;
+      virtual Int getDimension() const;
 
       /**
          Returns i-th coefficient of reduction polynomial of GF
@@ -106,7 +106,7 @@ class GaloisField
       Fint sum_times(Fint op, int times) const;
       Fint summed_times(Fint times, Fint res) const;
 
-      Fint get_size() const;
+      virtual Fint get_size() const;
 
       std::vector<Fint> find_subfield(int sub_m) const;
 
@@ -120,6 +120,7 @@ class GaloisField
       Fint size;
 
       std::vector<std::vector<Fint>> field_table;    // correspondence between a power of a primitive elem and a poly
+    protected:
       std::vector<std::vector<Fint>> add_table;             // a table for addition
       std::vector<std::vector<Fint>> sub_table;             // a table for subtraction
       std::vector<std::vector<Fint>> mult_table;            // a table for multiplication
@@ -128,7 +129,7 @@ class GaloisField
       std::vector<std::vector<Fint>> sum_times_table;
       std::vector<std::vector<Fint>> sum_times_table_transposed;
 
-      void create_tables();
+      virtual void create_tables();
 };
 
 inline Fint GaloisField::getModulus() const { return modulus; }

@@ -82,6 +82,8 @@ class GFelement
         GFelement trace() const;
 
         static GFelement dot(const std::vector<GFelement> &op1, const std::vector<GFelement> &op2);
+        static GFelement dot(const std::vector<GFelement> &op1, const std::vector<int> &op2);
+        static GFelement dot(const std::vector<int> &op1, const std::vector<GFelement> &op2);
         static GFelement dotint(const std::vector<int> &op1, const std::vector<GFelement> &op2);
         static GFelement dotint(const std::vector<GFelement> &op2, const std::vector<int> &op1);
 
