@@ -14,9 +14,12 @@
 
 #include <iostream>
 #include <cmath>
+#include <cstring>
+
 using namespace std;
 
 #include "gfelement.h"
+#include "GaloisField/galois_field_prime.h"
 
 namespace galoiscpp
 {
@@ -164,6 +167,20 @@ GFelement GFelement::operator-(Fint rhs) {
 //------------------------------------------------------
 GFelement GFelement::operator*(const GFelement& rhs) const
 {
+//    auto if_this_gf_prime = typeid(this->field) == typeid(GaloisFieldPrime&);
+//    auto if_rhs_gf_prime = typeid(rhs.field) == typeid(GaloisFieldPrime&);
+//    auto if_this_gf_prime = dynamic_cast<GaloisFieldPrime*>(this->field); typeid(this->field) == typeid(GaloisFieldPrime&);
+//    auto if_rhs_gf_prime = typeid(rhs.field) == typeid(GaloisFieldPrime&);
+//
+//    // if if_lhs_gf_prime (or if_rhs_gf_prime) is True, then GaloisFieldPrime, else GaloisField
+//    if (!if_this_gf_prime && if_rhs_gf_prime) {
+//        GFelement result(this->field, this->field->sum_times(this->degree, rhs.degree));
+//        return result;
+//    } else if (if_this_gf_prime && !if_rhs_gf_prime) {
+//        GFelement result(rhs.field, rhs.field->sum_times(rhs.degree, this->degree));
+//        return result;
+//    }
+
     if (rhs.field != field) throw ErrorIncompatibleFields;
 
     GFelement result(rhs.field, rhs.field->multiply(degree, rhs.degree));

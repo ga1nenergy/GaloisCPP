@@ -6,7 +6,9 @@
 #define GALOISCPP_GFPOLY_H
 
 #include <vector>
+#include "GaloisField/galois_field_prime.h"
 #include "GFelement/gfelement.h"
+#include "Auxillary/structures.h"
 
 // LSB goes first!
 
@@ -81,6 +83,7 @@ public:
 
     std::vector<GFelement> roots() const;
     static std::vector<GFelement> roots(const GFpoly& poly);
+    static std::vector<GFelement> roots(const std::vector<Fint> &coefs, const std::vector<GFelement> &set);
 
     std::vector<GFelement> roots_exhaustive() const;
     static std::vector<GFelement> roots_exhaustive(const GFpoly &poly);
@@ -97,11 +100,15 @@ public:
     GFelement polyval(Fint elem) const;
     static GFelement polyval(const GFpoly& poly, const GFelement& elem);
     static GFelement polyval(const GFpoly& poly, Fint elem);
+    static GFelement polyval(const std::vector<Fint> &coefs, const GFelement &elem);
 
     static GFpoly euclid(const GFpoly &op1, const GFpoly &op2, Fint degree);
     static std::vector<GFpoly> euclid_list(const GFpoly &op1, const GFpoly &op2);
     static std::pair<GFelement, GFpoly> extended_euclid(const GFpoly &op1, const GFpoly &op2);
     static GFpoly gcd(const GFpoly &op1, const GFpoly &op2);
+
+    static std::vector<std::vector<GFelement>> get_cosets(GaloisField *field, std::vector<int> *elem_idx = nullptr);
+    static std::vector<GFpoly> get_primitive_polys(GaloisField *field, GaloisFieldPrime *prime_field);
 
     GFpoly inverse(const GFpoly &mod) const;
     static GFpoly inverse(const GFpoly &poly, const GFpoly &mod);
@@ -125,7 +132,7 @@ public:
     const GaloisField* getField() const;
     Fint getDegree() const;
     std::vector<GFelement> getCoefs() const;
-    std::vector<int> getCoefsRaw() const;
+    std::vector<Fint> getCoefsRaw() const;
 };
 }
 

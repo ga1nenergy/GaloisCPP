@@ -8,8 +8,27 @@
 #include <iterator>
 
 namespace galoiscpp {
-    GaloisFieldPrime::GaloisFieldPrime(Fint mod) :modulus(mod), size(mod) {
+    GaloisFieldPrime::GaloisFieldPrime(Fint mod) {
+        modulus = mod;
+        size = mod;
+        dimension = 1;
+        reductpoly = new Fint[2]; // it is not used. added for compatibility with GaloisField
+
         create_tables();
+
+        for (auto i = 2; i < size; i++) {
+            auto counter = 1;
+            auto buf = i;
+            while (buf != 1) {
+                buf = mult_table[buf][i];
+                counter++;
+            }
+
+            if (counter == size - 1) {
+                generator = i;
+                break;
+            }
+        }
 
         std::cout << "Prime field is created!. Address: " << this << std::endl;
     }

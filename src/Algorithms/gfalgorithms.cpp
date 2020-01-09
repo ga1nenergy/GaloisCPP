@@ -171,7 +171,7 @@ namespace galoiscpp {
  * 1) improve logic
  */
     std::vector<std::vector<GFelement>> gauss_method(const std::vector<std::vector<GFelement>> &matrix) {
-        bool DEBUG = true;
+        bool DEBUG = false;
 
         std::vector<int> permutations(matrix.size());
         std::iota(permutations.begin(), permutations.end(), 0);

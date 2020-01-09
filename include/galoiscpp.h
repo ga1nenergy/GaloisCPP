@@ -12,6 +12,7 @@
 #include "GFpoly/gfpoly.h"
 #include "Auxillary/representations.h"
 #include "Auxillary/misc.hpp"
+#include "Auxillary/structures.h"
 #include "typedefs.h"
 
 #endif //GALOISCPP_GALOISCPP_H

@@ -61,6 +61,8 @@ GaloisField::GaloisField(Fint mod, Int dim) {
    get_irreducible_poly(modulus, dimension, reductpoly);
    create_tables();
 
+   generator = 2; // primitive element
+
    std::cout << "Field is created!. Address: " << this << std::endl;
 }
 

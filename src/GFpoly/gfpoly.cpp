@@ -3,12 +3,14 @@
 //
 
 #include "gfpoly.h"
-#include "../Algorithms/gfalgorithms.h"
+#include "Auxillary/structures.h"
 
 #include <vector>
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <numeric>
+#include <galoiscpp.h>
 
 namespace galoiscpp {
     GFpoly::GFpoly() = default;
@@ -435,6 +437,18 @@ namespace galoiscpp {
         return poly.roots();
     }
 
+    std::vector<GFelement> GFpoly::roots(const std::vector<Fint> &coefs, const std::vector<GFelement> &set) {
+        std::vector<GFelement> rts;
+
+        for (auto const &rt : set) {
+            if (polyval(coefs, rt) == 0) {
+                rts.push_back(rt);
+            }
+        }
+
+        return rts;
+    }
+
     std::vector<GFelement> GFpoly::roots_exhaustive() const {
         std::vector<GFelement> rts;
 
@@ -537,7 +551,8 @@ namespace galoiscpp {
         return poly.roots1();
     }
 
-    // suitable for cases when p^m is large
+    // suitable for cases when p^m is large.
+    // TODO: finish function
     std::vector<GFelement> GFpoly::roots2() const {
         std::vector<GFpoly> f_k_array;
         GFpoly F(field, 0); F[0] = 1;
@@ -559,6 +574,18 @@ namespace galoiscpp {
 
         for (int i = 1; i < degree + 1; i++) {
             s = s + coefs[i] * elem.power(i);
+        }
+        return s;
+    }
+
+    GFelement GFpoly::polyval(const std::vector<Fint> &coefs, const GFelement &elem) {
+        auto field = elem.getField();
+        auto degree = coefs.size() - 1;
+
+        GFelement s(field, coefs[0]);
+
+        for (int i = 1; i < degree + 1; i++) {
+            s = s + elem.power(i).sum_times(coefs[i]);
         }
         return s;
     }
@@ -686,6 +713,104 @@ namespace galoiscpp {
         return res;
     }
 
+    // TODO: make elem_idx more С++ way
+    std::vector<std::vector<GFelement>> GFpoly::get_cosets(GaloisField *field, std::vector<int> *elem_idx) {
+        bool LOCAL_DEBUG = false;
+
+        std::vector<std::vector<GFelement>> cosets;
+        std::vector<int> free_locators(field->get_size());
+        std::iota(free_locators.begin(), free_locators.end(), 0);
+
+        auto coset_num = 0;
+        for (auto i = free_locators.begin(); i != free_locators.end(); i = free_locators.begin()) {
+            std::vector<GFelement> coset;
+            GFelement elem(field, *i);
+
+            auto p_int = field->getModulus();
+            auto p_power_int = p_int;
+            auto current_elem = elem;
+            auto j = 1;
+            while (std::find(coset.begin(), coset.end(), current_elem) == coset.end()) {
+                coset.push_back(current_elem);
+                free_locators.erase(std::find(free_locators.begin(), free_locators.end(), current_elem.getDegree()));
+
+                if (LOCAL_DEBUG) {
+                    std::cout << "Free locators: ";
+                    std::copy(free_locators.begin(), free_locators.end(), std::ostream_iterator<int>(std::cout, " "));
+                    std::cout << std::endl;
+                }
+
+                if (elem_idx != nullptr) {
+                    elem_idx->operator[](current_elem.getDegree()) = coset_num;
+                }
+
+                current_elem = elem.power(pow(p_int, j));
+                if (LOCAL_DEBUG) {
+                    std::cout << "Current power: " << pow(p_int, j) << std::endl;
+                    std::cout << "Current elem: " << current_elem << std::endl;
+                }
+
+                p_power_int *= p_int;
+                j++;
+            }
+
+            if (LOCAL_DEBUG) {
+                std::cout << "Current coset elements: ";
+                std::copy(coset.begin(), coset.end(), ostream_iterator<GFelement>(std::cout, " "));
+                std::cout << std::endl;
+            }
+
+            cosets.push_back(coset);
+            coset_num++;
+        }
+
+        return cosets;
+    }
+
+    std::vector<GFpoly> GFpoly::get_primitive_polys(GaloisField *field, GaloisFieldPrime *prime_field) {
+        bool LOCAL_DEBUG = false;
+        auto cosets = get_cosets(field);
+
+        std::vector<GFpoly> primitive_polys;
+        for (auto const &c : cosets) {
+            GFpoly primitive_poly(field, 0);
+            primitive_poly[0] = 1;
+
+            if (LOCAL_DEBUG) {
+                std::cout << "Current coset: ";
+                std::copy(c.begin(), c.end(), std::ostream_iterator<GFelement>(std::cout, " "));
+                std::cout << std::endl;
+            }
+
+            for (auto const &e : c) {
+                GFpoly mul(field, 1);
+                mul[0] = -e; mul[1] = 1;
+                primitive_poly = primitive_poly * mul;
+            }
+
+            if (LOCAL_DEBUG) {
+                std::cout << "Current primitive poly: " << primitive_poly << std::endl;
+                auto rts = primitive_poly.roots();
+                std::cout << "Roots: ";
+                std::copy(rts.begin(), rts.end(), std::ostream_iterator<GFelement>(std::cout, " "));
+                std::cout << std::endl;
+            }
+
+            for (auto i = 0; i <= primitive_poly.getDegree(); i++) { // TODO: !!!
+                primitive_poly[i] = GFelement(prime_field,
+                        (field->field_table_ptr()->operator[](primitive_poly[i].getDegree())[0]));
+            }
+
+            if (LOCAL_DEBUG) {
+                std::cout << "New primitive poly: " << primitive_poly << std::endl;
+            }
+
+            primitive_polys.push_back(primitive_poly);
+        }
+
+        return primitive_polys;
+    }
+
     // Getters
     const GaloisField* GFpoly::getField() const {
         if (!coefs.empty()) {
@@ -703,8 +828,8 @@ namespace galoiscpp {
         return coefs;
     }
 
-    std::vector<int> GFpoly::getCoefsRaw() const {
-        std::vector<int> raw(coefs.size());
+    std::vector<Fint> GFpoly::getCoefsRaw() const {
+        std::vector<Fint> raw(coefs.size());
         for (auto i = 0; i < coefs.size(); i++) {
             raw[i] = coefs[i].getDegree();
         }

@@ -11,8 +11,6 @@
 namespace galoiscpp {
     class GaloisFieldPrime : public GaloisField {
     private:
-        Fint modulus;      // prime modulus (characteristic) of Galois Field
-        Fint size;
         std::vector<Fint> field_table;
 
         void create_tables() override;
@@ -29,8 +27,8 @@ namespace galoiscpp {
 
         GaloisFieldPrime& operator=(const GaloisFieldPrime &rhs);
 
-        Fint getModulus() const override { return modulus; }
-        Fint get_size() const override { return size; }
+//        Fint getModulus() const override { return modulus; }
+//        Fint get_size() const override { return size; }
     };
 }
 

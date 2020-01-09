@@ -83,6 +83,8 @@ class GaloisField
       */
       Fint reductionPolynomial(Int i) const;
 
+      Fint get_generator() const { return generator; }
+
       /**
          Outputs information about this Galois Field to the standard output.
          @param gf GaloisField on the right of << sign
@@ -106,6 +108,8 @@ class GaloisField
       Fint sum_times(Fint op, int times) const;
       Fint summed_times(Fint times, Fint res) const;
 
+      std::vector<std::vector<Fint>> *field_table_ptr() { return &field_table; } // TODO: !
+
       virtual Fint get_size() const;
 
       std::vector<Fint> find_subfield(int sub_m) const;
@@ -113,14 +117,17 @@ class GaloisField
       /* TODO
        * 1) get rid of all C-like stuff
        */
-   private:
+    private:
+      std::vector<std::vector<Fint>> field_table;    // correspondence between a power of a primitive elem and a poly
+
+    protected:
       Fint modulus;      // prime modulus (characteristic) of Galois Field
       Int dimension;     // dimension of Galois Field
       Fint* reductpoly;  // reduction polynomial of Galois Field
       Fint size;
 
-      std::vector<std::vector<Fint>> field_table;    // correspondence between a power of a primitive elem and a poly
-    protected:
+      Fint generator;
+
       std::vector<std::vector<Fint>> add_table;             // a table for addition
       std::vector<std::vector<Fint>> sub_table;             // a table for subtraction
       std::vector<std::vector<Fint>> mult_table;            // a table for multiplication
